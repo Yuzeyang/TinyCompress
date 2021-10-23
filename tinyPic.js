@@ -1,6 +1,8 @@
 const tinify = require('tinify');
 const fs = require('fs');
 
+const recursiveLimit = 10;
+
 tinify.key = fs.readFileSync('./.tinifyKey', 'utf8');
 tinify.validate(err => {
   if (err) {
@@ -26,7 +28,7 @@ tinify.validate(err => {
             if (err) {
               console.log('\x1b[31m', `#  - ${fileName} read error. ${err.message}`);
             } else {
-              recursiveCompress(fileName, buf);
+              recursiveCompress(fileName, buf, recursiveLimit);
             }
           });
         });
@@ -35,12 +37,13 @@ tinify.validate(err => {
   }
 });
 
-const recursiveCompress = (fileName, preBuf) => {
+const recursiveCompress = (fileName, preBuf, count) => {
   tinify.fromBuffer(preBuf).toBuffer((err, buf) => {
     if (err) {
       console.log('\x1b[31m', `#  - ${fileName} compress error. ${err.message}`);
     } else if ((1 - buf.length/preBuf.length) > 0.001) {
-      recursiveCompress(fileName, buf);
+      count--;
+      recursiveCompress(fileName, buf, count);
     } else {
       fs.writeFile(`./compressed/${fileName}`, buf, err => {
         if (err) {

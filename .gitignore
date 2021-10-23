@@ -1,0 +1,5 @@
+node_modules
+.tinifyKey
+package-lock.json
+files
+compressed
